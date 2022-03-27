@@ -1,6 +1,6 @@
 blueprint:
-  name: Advanced medication reminder
-  description: Get advanced notification and history for medication reminder
+  name: Advanced  reminder
+  description: Get advanced notification and history for a reminder
   domain: automation
   input:
     reminder_time:
@@ -26,18 +26,18 @@ blueprint:
 
     notification_title:
       name: Notification title (Optional)
-      description: "Default: Medication reminder"
-      default: "Medication reminder!"
+      description: "Default: A reminder"
+      default: "A reminder!"
 
     notification_message:
       name: Notification message (Optional)
-      description: "Default: It's time to take your medication"
-      default: "It's time to take your medication"
+      description: "Default: Notification message"
+      default: "Notification message"
 
-    notification_action_taken:
-      name: "Notification action: Taken (Optional)"
-      description: "Default: Taken"
-      default: "Taken"
+    notification_action_acknowledge:
+      name: "Notification action: Acknowledge (Optional)"
+      description: "Default: Acknowledge"
+      default: "Acknowledge"
 
     notification_action_later:
       name: "Notification action: Ask later (Optional)"
@@ -64,10 +64,10 @@ blueprint:
       description: "Default: Reminder sent"
       default: "Reminder sent"
 
-    logbook_message_taken:
-      name: Logbook message for action Taken (Optional)
-      description: "Default: Medication taken"
-      default: "Medication taken"
+    logbook_message_acknowledge:
+      name: Logbook message for action Acknowledge (Optional)
+      description: "Default: Reminder acknowledge"
+      default: "Reminder acknowledge"
 
     logbook_message_later:
       name: Logbook message for action Ask later (Optional)
@@ -102,7 +102,7 @@ action:
   - service: input_boolean.turn_off
     target:
       entity_id: !input input_boolean
-  - alias: "Notify until the medication has been take"
+  - alias: "Notify until the reminder has been acknowledged"
     repeat:
       while:
         - condition: state
@@ -124,8 +124,8 @@ action:
           message: !input notification_message
           data:
             actions:
-              - title: !input notification_action_taken
-                action: "taken"
+              - title: !input notification_action_acknowledge
+                action: "acknowledge"
               - title: !input notification_action_later
                 action: "later"
               - title: !input notification_action_skip
@@ -139,7 +139,7 @@ action:
           timeout:
             minutes: !input ask_later_wait_time
         - choose:
-            - conditions: "{{ wait.trigger.event.data.action == 'taken' }}"
+            - conditions: "{{ wait.trigger.event.data.action == 'acknowledge' }}"
               sequence:
                 - service: input_boolean.turn_on
                   target:
@@ -147,7 +147,7 @@ action:
                 - service: logbook.log
                   data:
                     name: !input notification_title
-                    message: !input logbook_message_taken
+                    message: !input logbook_message_acknowledge
                     entity_id: !input input_boolean
             - conditions: "{{ wait.trigger.event.data.action == 'later' }}"
               sequence:
